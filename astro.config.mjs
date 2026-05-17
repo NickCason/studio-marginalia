@@ -21,5 +21,18 @@ export default defineConfig({
     resolve: {
       alias: { '~': fileURLToPath(new URL('./src', import.meta.url)) },
     },
+    // The OG route (`src/pages/og/[...slug].png.ts`) uses @resvg/resvg-js,
+    // which ships a native .node binary. The route is prerendered, so the
+    // worker never executes it — but Rollup still walks its import graph
+    // and chokes on the binary. Mark it external for the SSR build to keep
+    // it out of the worker bundle.
+    ssr: {
+      external: ['@resvg/resvg-js'],
+    },
+    build: {
+      rollupOptions: {
+        external: ['@resvg/resvg-js'],
+      },
+    },
   },
 });
