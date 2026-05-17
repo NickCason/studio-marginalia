@@ -33,31 +33,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile --prefer-offline
 
-      # Cache Tina's compiled admin SPA + generated client/types, keyed on
-      # everything that influences them (config + content schema + tina deps).
-      # Content-only edits don't change this hash → cache hit → skip the 30s
-      # tinacms build entirely.
-      - name: Cache Tina admin SPA
-        id: tina-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            public/admin
-            tina/__generated__
-            tina/tina-lock.json
-          key: tina-admin-${{ runner.os }}-${{ hashFiles('tina/config.ts', 'src/content/config.ts', 'pnpm-lock.yaml') }}
-
-      - name: Build Tina admin (only if cache miss)
-        if: steps.tina-cache.outputs.cache-hit != 'true'
-        env:
-          TINA_PUBLIC_CLIENT_ID: ${{ secrets.TINA_PUBLIC_CLIENT_ID }}
-          TINA_TOKEN: ${{ secrets.TINA_TOKEN }}
-        run: pnpm tinacms build --skip-cloud-checks
-
       - name: Build Astro
         env:
-          TINA_PUBLIC_CLIENT_ID: ${{ secrets.TINA_PUBLIC_CLIENT_ID }}
-          TINA_TOKEN: ${{ secrets.TINA_TOKEN }}
           PUBLIC_FORMSPREE_ENDPOINT: ${{ secrets.PUBLIC_FORMSPREE_ENDPOINT }}
           PUBLIC_SITE_URL: https://bluestudio.space
         run: pnpm astro build
