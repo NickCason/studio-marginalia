@@ -126,7 +126,7 @@ export default config({
           validation: { isRequired: false },
         }),
 
-        body: fields.markdoc({ label: 'Body' }),
+        body: fields.markdoc({ label: 'Body', extension: 'md' }),
       },
     }),
 
@@ -150,7 +150,7 @@ export default config({
           validation: { isRequired: false },
         }),
         order: fields.integer({ label: 'Display order (lower = earlier)', defaultValue: 0 }),
-        body: fields.markdoc({ label: 'Body' }),
+        body: fields.markdoc({ label: 'Body', extension: 'md' }),
       },
     }),
 
@@ -215,7 +215,7 @@ export default config({
       schema: {
         title: fields.text({ label: 'Page title' }),
         dek: fields.text({ label: 'Subtitle (optional)', validation: { isRequired: false } }),
-        body: fields.markdoc({ label: 'Body' }),
+        body: fields.markdoc({ label: 'Body', extension: 'md' }),
       },
     }),
   },
