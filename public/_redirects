@@ -12,3 +12,8 @@
 # OG images follow the same slug change
 /og/notes-from-the-build/:slug.png   /og/:slug.png   301
 /og/notes-from-the-build/:slug.png/  /og/:slug.png/  301
+
+# Tina's old admin URL now points at KeyStatic.
+/admin                                /keystatic/    301
+/admin/                               /keystatic/    301
+/admin/*                              /keystatic/    301
