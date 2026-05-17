@@ -8,7 +8,11 @@ import waveformIntegration from './src/integrations/waveform.mjs';
 
 export default defineConfig({
   site: 'https://bluestudio.space',
-  trailingSlash: 'always',
+  // 'ignore' (not 'always') so the SSR layer doesn't 308-redirect KeyStatic's
+  // API routes (e.g. /api/keystatic/github/oauth/callback) into a 404.
+  // Prerendered public pages still resolve under either form because they're
+  // served as static index.html files by the CDN.
+  trailingSlash: 'ignore',
   build: { format: 'directory' },
   // KeyStatic admin needs SSR for its API handlers. Existing pages opt back
   // into prerendering via `export const prerender = true;` at the top of each
