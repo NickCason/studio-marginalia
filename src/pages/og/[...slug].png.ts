@@ -1,10 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
-import { Resvg } from '@resvg/resvg-js';
-import satori from 'satori';
-import { ogJsx } from '~/lib/og/render';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+
+export const prerender = true;
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => !data.draft);
@@ -24,6 +21,17 @@ function asciiClean(s: string): string {
 }
 
 export const GET: APIRoute = async ({ props }) => {
+  // Imports are dynamic so the Cloudflare worker bundle never has to resolve
+  // the resvg native `.node` binary. This route only runs at build time
+  // (prerender=true) where Node can load it.
+  const [{ Resvg }, { default: satori }, { ogJsx }, { default: fs }, { default: path }] = await Promise.all([
+    import('@resvg/resvg-js'),
+    import('satori'),
+    import('~/lib/og/render'),
+    import('node:fs/promises'),
+    import('node:path'),
+  ]);
+
   const post = (props as { post: any }).post;
   let title = '';
   switch (post.data.type) {
