@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+
+export const prerender = true;
 import { Resvg } from '@resvg/resvg-js';
 import satori from 'satori';
 import { ogJsx } from '~/lib/og/render';
