@@ -12,8 +12,3 @@ test-results
 src/content/posts/**/*.waveform.json
 public/audio/*.waveform.json
 public/media/*.waveform.json
-
-# Tina build artifacts (admin SPA + generated types)
-public/admin
-tina/__generated__
-.tina/__generated__
