@@ -163,7 +163,7 @@ export default config({
         slug: fields.slug({ name: { label: 'Filename slug' } }),
         quote: fields.text({ label: 'Quote / observation' }),
         source: fields.text({ label: 'Source / context' }),
-        publishedAt: fields.datetime({ label: 'Date' }),
+        publishedAt: fields.date({ label: 'Date' }),
       },
     }),
   },
