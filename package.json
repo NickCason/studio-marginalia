@@ -4,11 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tinacms dev -c \"astro dev\"",
-    "dev:astro": "astro dev",
-    "dev:host": "tinacms dev -c \"astro dev --host 0.0.0.0\"",
-    "build": "tinacms build --skip-cloud-checks && astro build",
-    "build:astro": "astro build",
+    "dev": "astro dev",
+    "dev:host": "astro dev --host 0.0.0.0",
+    "build": "astro build",
     "preview": "astro preview",
     "preview:host": "astro preview --host 0.0.0.0",
     "test": "vitest run",
@@ -28,12 +26,10 @@
     "@keystatic/core": "^0.5.50",
     "@phosphor-icons/web": "^2.1.2",
     "@resvg/resvg-js": "^2.6.2",
-    "@tinacms/cli": "^2.2.5",
     "astro": "^5.7.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "satori": "^0.26.0",
-    "tinacms": "^3.7.5"
+    "satori": "^0.26.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",

@@ -12,8 +12,8 @@ Six post types in one feed (essay, note, quote, link, photo, voice memo), a side
 
 ## Stack
 
-- **Astro 5** static site, Content Collections for posts/portfolio/sidebar data
-- **TinaCMS** *(scaffold ready, awaits Tina Cloud account)* for friendly authoring
+- **Astro 5** in server mode, Content Collections for posts/portfolio/sidebar data; every public route opts back into prerender so the reader-facing site stays fully static and only the CMS admin runs in the Cloudflare worker
+- **KeyStatic** (git-backed, no external CMS service) for authoring; admin lives at `/keystatic/` and commits markdown straight to the repo via a GitHub App
 - **Cloudflare Pages** for hosting (free, fast, push-to-deploy)
 - **TypeScript** strict, **Vitest** unit, light **Playwright** smoke
 - **Phosphor Icons** Duotone weight; **Fraunces** + **Inter** via Fontsource (self-hosted)
@@ -47,8 +47,10 @@ Copy `.env.example` to `.env.local` and fill in as accounts come online:
 
 | Var | What | Where to get |
 |-----|------|--------------|
-| `TINA_PUBLIC_CLIENT_ID` | Tina Cloud client ID | https://app.tina.io after creating a project |
-| `TINA_TOKEN` | Tina read-only token | same |
+| `KEYSTATIC_GITHUB_CLIENT_ID` | GitHub App Client ID | https://github.com/settings/apps after creating the CMS app |
+| `KEYSTATIC_GITHUB_CLIENT_SECRET` | GitHub App Client Secret | same — generate a new one if lost |
+| `KEYSTATIC_SECRET` | 32+ char random string used to sign session cookies | `openssl rand -hex 32` |
+| `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` | The GitHub App's URL slug | from the app's settings URL |
 | `PUBLIC_FORMSPREE_ENDPOINT` | Contact form action URL | https://formspree.io after creating a form |
 | `TTS_ENDPOINT` | Tailnet speaches URL | default: `http://precision-node4:8000` |
 | `TTS_VOICE` | Kokoro voice id | default: `af_bella` |
@@ -95,13 +97,13 @@ docs/superpowers/
 2. Add `src/components/post-types/<Type>Card.astro` (feed card) and `src/components/post-permalinks/<Type>Page.astro` (permalink).
 3. Wire it into the switch in `src/pages/index.astro` and `src/pages/journal/[...slug].astro`.
 4. Add a case to `src/pages/rss.xml.ts`.
-5. Mirror the schema in `tina/config.ts` if/when Tina is wired up.
+5. Mirror the schema in `keystatic.config.tsx` so the admin can edit the new type.
 
 ## Authoring
 
-- **Markdown files (current):** add a markdown file under `src/content/posts/<slug>.md` (or a folder with `index.md` for posts that need sibling assets) with the right frontmatter.
-- **Voice memos:** `pnpm tts -- --text "..." --out src/content/posts/<slug>/audio.mp3` (uses the tailnet TTS endpoint). The build will generate the waveform automatically.
-- **Tina (when set up):** open `/admin/` and login with GitHub. Tina commits markdown to the repo.
+- **KeyStatic admin (recommended):** open `/keystatic/` and sign in with GitHub. KeyStatic commits markdown to the repo via its GitHub App.
+- **Markdown files (direct):** add a markdown file under `src/content/posts/<slug>.md` with the right frontmatter.
+- **Voice memos:** `pnpm tts -- --text "..." --out public/audio/<slug>.mp3` (uses the tailnet TTS endpoint). The build will generate the waveform automatically.
 
 ## Deployment (first time, once Nick has accounts)
 
