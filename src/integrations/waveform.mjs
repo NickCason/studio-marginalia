@@ -6,7 +6,12 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
 const BUCKETS = 32;
-const AUDIO_EXT = ['.mp3', '.m4a', '.wav', '.ogg', '.flac'];
+// .webm + .mp4 added for browser MediaRecorder output (Chromium → webm/Opus,
+// Safari → mp4/AAC). audio-decode may not handle all containers natively;
+// the try/catch in processAudioFile turns a decode failure into a warning,
+// and AudioCard.astro falls back to flat-bar render when waveform JSON is
+// absent — so unsupported formats degrade gracefully rather than crash.
+const AUDIO_EXT = ['.mp3', '.m4a', '.wav', '.ogg', '.flac', '.webm', '.mp4'];
 
 async function processAudioFile(filepath) {
   const wfOut = filepath.replace(/\.[^.]+$/, '.waveform.json');
