@@ -25,12 +25,21 @@ function assertRequired<T>(value: T, validation: FieldOpts['validation'], label:
 }
 
 /**
- * Strip publicPath prefix from a stored YAML string to get the on-disk
- * filename. Returns the value untouched if it doesn't start with publicPath
- * (legacy / external URL).
+ * Build the slug-aware URL prefix that KeyStatic uses for collection-item
+ * assets: `<publicPath>/<slug>/` when slug is present, or `<publicPath>/`
+ * when it is not (single-entry or top-level asset). Mirrors the behaviour of
+ * `getSrcPrefix(publicPath, args.slug)` in the KeyStatic core.
  */
-function srcPrefixStrip(value: string, publicPath: string): string {
-  const prefix = publicPath.replace(/\/*$/, '') + '/';
+function srcPrefixWithSlug(publicPath: string, slug: string | undefined): string {
+  const base = publicPath.replace(/\/*$/, '') + '/';
+  return slug ? `${base}${slug}/` : base;
+}
+
+/**
+ * Strip a known prefix from a stored string. Returns the value untouched if
+ * it does not start with the prefix (legacy / external URL).
+ */
+function stripPrefix(value: string, prefix: string): string {
   return value.startsWith(prefix) ? value.slice(prefix.length) : value;
 }
 
@@ -51,19 +60,32 @@ export function audioRecorder(opts: FieldOpts) {
       autoFocus: boolean;
       forceValidation: boolean;
     }) {
-      // KeyStatic's asset-field doesn't surface the stored string directly to
-      // Input; it passes parsed asset value (or null). We reconstruct the
-      // original string from props.value.filename + opts.publicPath when
-      // there's a value, so the player can render an existing recording.
-      const filename = props.value?.filename;
+      // Three cases:
+      //   1. No value yet: existingValueString = null
+      //   2. Legacy/external value (parse couldn't load an on-disk asset →
+      //      data is empty Uint8Array): value.filename holds the original full
+      //      URL — use it directly.
+      //   3. In-collection asset (parse loaded the binary from disk): the slug
+      //      is not available in this prop surface, so we can't reconstruct
+      //      the slug-aware fetch URL. Build a blob: URL from the loaded bytes
+      //      so the player works without needing the slug.
+      //
+      // NOTE: the blob URL created in case 3 is not revoked on unmount. The
+      // URL is small (one per render of an existing post) and revocation would
+      // require a useEffect with a ref — acceptable leak for v1.
       let existingValueString: string | null = null;
-      if (filename) {
-        if (filename.startsWith('/') || /^https?:\/\//i.test(filename)) {
-          // Legacy or external URL — already a full path, use as-is.
-          existingValueString = filename;
+      if (props.value) {
+        if (props.value.data.length === 0) {
+          // Legacy/external — value.filename IS the full URL
+          existingValueString = props.value.filename || null;
         } else {
-          // In-collection asset — prepend publicPath.
-          existingValueString = `${opts.publicPath.replace(/\/*$/, '')}/${filename}`;
+          // In-collection: build blob URL from the loaded asset bytes.
+          // Wrap in a fresh Uint8Array to satisfy Blob's BlobPart constraint —
+          // KeyStatic types the field value as Uint8Array<ArrayBufferLike> but
+          // Blob only accepts Uint8Array<ArrayBuffer>. The copy is trivially
+          // small (one audio file, only when an existing post is open).
+          const blob = new Blob([new Uint8Array(props.value.data)]);
+          existingValueString = URL.createObjectURL(blob);
         }
       }
       return (
@@ -92,10 +114,10 @@ export function audioRecorder(opts: FieldOpts) {
      */
     filename(
       value: unknown,
-      _args: { suggestedFilenamePrefix: string | undefined; slug: string | undefined },
+      args: { suggestedFilenamePrefix: string | undefined; slug: string | undefined },
     ): string | undefined {
       if (typeof value === 'string' && value.length > 0) {
-        return srcPrefixStrip(value, opts.publicPath);
+        return stripPrefix(value, srcPrefixWithSlug(opts.publicPath, args.slug));
       }
       return undefined;
     },
@@ -108,12 +130,12 @@ export function audioRecorder(opts: FieldOpts) {
       if (typeof value !== 'string') {
         throw new FieldDataError('audioFile must be a string');
       }
-      const stripped = srcPrefixStrip(value, opts.publicPath);
+      const stripped = stripPrefix(value, srcPrefixWithSlug(opts.publicPath, args.slug));
       if (args.asset === undefined) {
         // Legacy / external URL: no matching asset on disk in our directory
-        // (value doesn't start with publicPath, or file is genuinely missing).
-        // Return a descriptor with empty data so the player can still render
-        // the URL — we reconstruct it in the Input component.
+        // (value doesn't start with publicPath + slug, or file is genuinely
+        // missing). Return a descriptor with empty data so the player can still
+        // render the URL — the Input component uses value.filename directly.
         return {
           data: new Uint8Array(),
           filename: stripped,
@@ -141,14 +163,16 @@ export function audioRecorder(opts: FieldOpts) {
       }
       if (value.data.length === 0) {
         // Legacy/external value hydrated from disk but user didn't re-record.
-        // Preserve the original frontmatter string (value.filename holds the full
-        // legacy URL because parse() didn't strip a non-matching publicPath).
+        // Preserve the original frontmatter string (value.filename holds the
+        // full legacy URL because parse() didn't strip a non-matching prefix).
         return { value: value.filename, asset: undefined };
       }
       // React component already built the filename via generateAudioFilename().
       // Ignore suggestedFilenamePrefix — the spec requires voice-memo-<ts> form.
+      // Mirror fields.file: include the slug in the URL so it matches the path
+      // KeyStatic writes to disk (<directory>/<slug>/<filename>).
       const filename = value.filename;
-      const url = `${opts.publicPath.replace(/\/*$/, '')}/${filename}`;
+      const url = `${srcPrefixWithSlug(opts.publicPath, args.slug)}${filename}`;
       return {
         value: url,
         asset: { filename, content: value.data },
