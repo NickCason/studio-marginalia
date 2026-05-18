@@ -105,6 +105,29 @@ docs/superpowers/
 - **Markdown files (direct):** add a markdown file under `src/content/posts/<slug>.md` with the right frontmatter.
 - **Voice memos:** `pnpm tts -- --text "..." --out public/audio/<slug>.mp3` (uses the tailnet TTS endpoint). The build will generate the waveform automatically.
 
+### Voice memo smoke checklist (after deploys that touch the recorder)
+
+Run these manually on `bluestudio.space/keystatic/` after any change to
+the recorder, waveform integration, or KeyStatic schema for the voice-memo
+post type:
+
+1. **Record a new voice memo**: New post → type Voice memo → click Record →
+   speak for ~10 seconds → Stop → Use this recording → fill in title +
+   duration → Save. After the Cloudflare deploy completes, confirm the new
+   post appears on the live feed with a working player (waveform if the
+   format decoded, flat bars if not — both are acceptable).
+2. **Re-record an existing**: open the existing legacy voice memo →
+   click Re-record → record short clip → Use this recording → Save. Verify
+   a new file landed at `/media/voice-memo-…` and the post's audioFile
+   frontmatter now points there.
+3. **Upload path**: click Upload file → pick an existing mp3/m4a from disk
+   → Use this recording → Save. Same deploy verification.
+4. **Mic-denied path**: deny microphone permission when the browser
+   prompts → confirm the inline error message appears and Upload is still
+   available.
+5. **Safari**: repeat steps 1 and 3 in Safari (recordings will be `.mp4`
+   instead of `.webm` — both should round-trip cleanly).
+
 ## Deployment (first time, once Nick has accounts)
 
 1. **Cloudflare account:** https://dash.cloudflare.com/sign-up (free)
