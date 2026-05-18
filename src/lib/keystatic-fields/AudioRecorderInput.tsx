@@ -41,12 +41,11 @@ const MIME_CANDIDATES = [
   'audio/mpeg',
 ] as const;
 
-function extensionFromMime(mime: string): string {
+function extensionFromMime(mime: string): string | null {
   if (mime.startsWith('audio/webm')) return 'webm';
   if (mime.startsWith('audio/mp4')) return 'mp4';
   if (mime.startsWith('audio/mpeg')) return 'mp3';
-  // Sensible fallback — should never hit because pickAudioMimeType returned this.
-  return 'bin';
+  return null;
 }
 
 export function AudioRecorderInput(props: Props) {
@@ -67,6 +66,11 @@ export function AudioRecorderInput(props: Props) {
   useEffect(() => {
     return () => {
       if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+      // Also kill any in-flight recorder + tracks so the mic indicator goes away.
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
+      streamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
@@ -132,7 +136,10 @@ export function AudioRecorderInput(props: Props) {
       if (ev.data && ev.data.size > 0) chunksRef.current.push(ev.data);
     };
     recorder.onstop = async () => {
-      const blob = new Blob(chunksRef.current, { type: mime });
+      // Capture chunks BEFORE awaiting — a fresh startRecording can swap
+      // chunksRef.current out from under us between Stop click and arrayBuffer resolve.
+      const localChunks = chunksRef.current;
+      const blob = new Blob(localChunks, { type: mime });
       const arr = new Uint8Array(await blob.arrayBuffer());
       const url = URL.createObjectURL(blob);
       if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
@@ -175,6 +182,10 @@ export function AudioRecorderInput(props: Props) {
 
   function commitRecording(s: Extract<State, { status: 'recorded' }>) {
     const ext = extensionFromMime(s.mimeType);
+    if (!ext) {
+      dispatch({ type: 'ERROR', reason: `Unknown recording format: ${s.mimeType}` });
+      return;
+    }
     const filename = generateAudioFilename(new Date(), ext);
     props.onChange({ data: s.blob, filename, extension: ext });
   }
