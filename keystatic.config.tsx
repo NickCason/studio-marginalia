@@ -125,7 +125,7 @@ export default config({
           {
             label: '[GALLERY] Images',
             itemLabel: (props) =>
-              props.fields.caption.value || props.fields.src.value || '(image)',
+              props.fields.caption.value || props.fields.src.value?.filename || '(image)',
           },
         ),
 
