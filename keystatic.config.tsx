@@ -1,4 +1,5 @@
 import { config, collection, singleton, fields } from '@keystatic/core';
+import { audioRecorder } from './src/lib/keystatic-fields/audioRecorder';
 
 const mediaImage = (label: string, description?: string) =>
   fields.image({
@@ -107,11 +108,13 @@ export default config({
           validation: { isRequired: false },
         }),
 
-        audioFile: mediaFile(
-          '[VOICE MEMO] Audio file (mp3/m4a)',
-          'public/audio',
-          '/audio/',
-        ),
+        audioFile: audioRecorder({
+          label: '[VOICE MEMO] Audio file',
+          description: 'Record in the browser or upload a file. Saved to /media/.',
+          directory: 'public/media',
+          publicPath: '/media/',
+          validation: { isRequired: false },
+        }),
         duration: fields.text({
           label: '[VOICE MEMO] Duration mm:ss',
           validation: { isRequired: false },
