@@ -1,5 +1,6 @@
 import { config, collection, singleton, fields } from '@keystatic/core';
 import { audioRecorder } from './src/lib/keystatic-fields/audioRecorder';
+import { BrandMark } from './src/lib/keystatic-ui/BrandMark';
 
 const mediaImage = (label: string, description?: string) =>
   fields.image({
@@ -44,7 +45,7 @@ export default config({
         },
 
   ui: {
-    brand: { name: 'Blue Studio' },
+    brand: { name: 'Blue Studio', mark: BrandMark },
     navigation: {
       Content: ['posts', 'portfolio', 'noticing'],
       'Site state': ['now', 'site', 'aboutPage'],
