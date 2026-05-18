@@ -1,0 +1,291 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import MetaRow from '~/components/ui/MetaRow.astro';
+import TagList from '~/components/ui/TagList.astro';
+import { formatDate } from '~/lib/formatDate';
+
+interface Props { post: CollectionEntry<'posts'>; }
+const { post } = Astro.props;
+if (post.data.type !== 'gallery') throw new Error('GalleryCard requires gallery post');
+
+const images = post.data.images;
+const isSingle = images.length === 1;
+---
+<article class="gallery-card">
+  {isSingle ? (
+    <img
+      src={images[0].src}
+      alt={images[0].caption ?? ''}
+      class="single-img"
+      loading="lazy"
+      data-photo-lightbox
+      data-lightbox-caption={images[0].caption ?? ''}
+    />
+  ) : (
+    <div class="carousel" data-gallery-carousel data-index="0">
+      <div class="stage">
+        {images.map((img, i) => (
+          <div class="slide" data-slide-index={i} data-pos={i === 0 ? 'active' : 'hidden'}>
+            <img
+              src={img.src}
+              alt={img.caption ?? ''}
+              loading="lazy"
+              data-photo-lightbox
+              data-lightbox-caption={img.caption ?? ''}
+            />
+          </div>
+        ))}
+      </div>
+      <button type="button" class="nav prev" data-nav-prev aria-label="Previous photo">‹</button>
+      <button type="button" class="nav next" data-nav-next aria-label="Next photo">›</button>
+      <div class="dots" role="tablist" aria-label="Gallery navigation">
+        {images.map((_, i) => (
+          <button type="button" class="dot" data-dot-index={i} aria-label={`Photo ${i + 1}`} aria-selected={i === 0 ? 'true' : 'false'}></button>
+        ))}
+      </div>
+    </div>
+  )}
+  {!isSingle && images[0].caption && (
+    <p class="cap serif-italic" data-active-caption>— {images[0].caption}</p>
+  )}
+  {isSingle && images[0].caption && (
+    <p class="cap serif-italic">— {images[0].caption}</p>
+  )}
+  <MetaRow items={[
+    isSingle ? 'Photo' : `Gallery · ${images.length} photos`,
+    formatDate(post.data.publishedAt),
+  ]} />
+  <TagList tags={post.data.tags} />
+</article>
+
+<style>
+  .gallery-card { container-type: inline-size; }
+  .single-img {
+    display: block;
+    max-width: 100%;
+    max-height: 70vh;
+    width: auto;
+    height: auto;
+    margin: 0 auto 14px;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-card);
+  }
+  .carousel {
+    position: relative;
+    margin-bottom: 18px;
+    user-select: none;
+    touch-action: pan-y;
+  }
+  .stage {
+    position: relative;
+    height: clamp(280px, 56vw, 560px);
+    perspective: 1400px;
+    overflow: visible;
+  }
+  .slide {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 72%;
+    max-width: 520px;
+    transform: translate(-50%, -50%) scale(0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 520ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 380ms ease,
+      filter 380ms ease;
+    will-change: transform, opacity;
+    z-index: 1;
+  }
+  .slide img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: clamp(260px, 54vw, 540px);
+    object-fit: contain;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-card);
+    background: var(--card-bg, rgba(0,0,0,0.04));
+  }
+  .slide[data-pos="active"] {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 3;
+    filter: none;
+  }
+  .slide[data-pos="prev"] {
+    transform: translate(calc(-50% - 68%), -50%) scale(0.78) rotateY(8deg);
+    opacity: 0.5;
+    z-index: 2;
+    filter: saturate(0.85) brightness(0.9);
+  }
+  .slide[data-pos="next"] {
+    transform: translate(calc(-50% + 68%), -50%) scale(0.78) rotateY(-8deg);
+    opacity: 0.5;
+    z-index: 2;
+    filter: saturate(0.85) brightness(0.9);
+  }
+  .nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.42);
+    color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    transition: background var(--t-fast, 180ms) var(--ease, ease), transform 180ms ease;
+  }
+  .nav:hover { background: rgba(0, 0, 0, 0.62); }
+  .nav:active { transform: translateY(-50%) scale(0.94); }
+  .prev { left: 8px; }
+  .next { right: 8px; }
+  :root[data-theme='light'] .nav {
+    background: rgba(255, 255, 255, 0.78);
+    color: var(--fg);
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+  :root[data-theme='light'] .nav:hover { background: rgba(255, 255, 255, 0.96); }
+  .dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--rule-dotted, rgba(255, 255, 255, 0.25));
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background var(--t-fast, 180ms) ease, transform 180ms ease;
+  }
+  .dot[aria-selected="true"] {
+    background: var(--accent);
+    transform: scale(1.4);
+  }
+  .cap {
+    font-size: 15px;
+    opacity: 0.9;
+    margin: 0 0 12px;
+    text-align: center;
+    transition: opacity 200ms ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: opacity 200ms ease; }
+    .slide[data-pos="prev"],
+    .slide[data-pos="next"] { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  }
+</style>
+
+<script>
+  // One handler for ALL [data-gallery-carousel] instances on the page.
+  // Rebinds on astro:page-load and tears down on astro:before-swap to play
+  // nicely with view transitions (same pattern as PhotoLightbox).
+
+  type Carousel = {
+    root: HTMLElement;
+    slides: HTMLElement[];
+    captions: (string | null)[];
+    captionEl: HTMLElement | null;
+    dots: HTMLElement[];
+    index: number;
+    swipeStartX: number | null;
+    swipeStartY: number | null;
+  };
+
+  const carousels = new Map<HTMLElement, Carousel>();
+
+  function setIndex(c: Carousel, next: number) {
+    const n = c.slides.length;
+    if (n === 0) return;
+    c.index = ((next % n) + n) % n;
+    const prev = (c.index - 1 + n) % n;
+    const nxt = (c.index + 1) % n;
+    for (let i = 0; i < n; i++) {
+      const slide = c.slides[i];
+      const pos = i === c.index ? 'active' : i === prev ? 'prev' : i === nxt ? 'next' : 'hidden';
+      slide.setAttribute('data-pos', pos);
+    }
+    for (let i = 0; i < c.dots.length; i++) {
+      c.dots[i].setAttribute('aria-selected', i === c.index ? 'true' : 'false');
+    }
+    if (c.captionEl) {
+      const cap = c.captions[c.index];
+      if (cap && cap.trim()) {
+        c.captionEl.textContent = '— ' + cap;
+        c.captionEl.style.display = '';
+      } else {
+        c.captionEl.style.display = 'none';
+      }
+    }
+    c.root.setAttribute('data-index', String(c.index));
+  }
+
+  function init(root: HTMLElement) {
+    if (carousels.has(root)) return;
+    const slides = Array.from(root.querySelectorAll<HTMLElement>('[data-slide-index]'));
+    const captions = slides.map((s) => {
+      const img = s.querySelector('img');
+      return img?.getAttribute('data-lightbox-caption') ?? null;
+    });
+    const captionEl = root.parentElement?.querySelector<HTMLElement>('[data-active-caption]') ?? null;
+    const dots = Array.from(root.querySelectorAll<HTMLElement>('[data-dot-index]'));
+    const c: Carousel = {
+      root, slides, captions, captionEl, dots,
+      index: 0, swipeStartX: null, swipeStartY: null,
+    };
+    carousels.set(root, c);
+
+    root.querySelector<HTMLElement>('[data-nav-prev]')?.addEventListener('click', () => setIndex(c, c.index - 1));
+    root.querySelector<HTMLElement>('[data-nav-next]')?.addEventListener('click', () => setIndex(c, c.index + 1));
+    for (const dot of dots) {
+      dot.addEventListener('click', () => {
+        const i = Number(dot.dataset.dotIndex || '0');
+        setIndex(c, i);
+      });
+    }
+
+    root.addEventListener('pointerdown', (e) => {
+      if ((e.target as HTMLElement).closest('button')) return;
+      c.swipeStartX = e.clientX;
+      c.swipeStartY = e.clientY;
+    });
+    root.addEventListener('pointerup', (e) => {
+      if (c.swipeStartX === null || c.swipeStartY === null) return;
+      const dx = e.clientX - c.swipeStartX;
+      const dy = e.clientY - c.swipeStartY;
+      c.swipeStartX = c.swipeStartY = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        setIndex(c, c.index + (dx < 0 ? 1 : -1));
+      }
+    });
+    root.addEventListener('pointercancel', () => { c.swipeStartX = c.swipeStartY = null; });
+
+    setIndex(c, 0);
+  }
+
+  function bindAll() {
+    for (const root of document.querySelectorAll<HTMLElement>('[data-gallery-carousel]')) {
+      init(root);
+    }
+  }
+  function teardown() { carousels.clear(); }
+
+  bindAll();
+  document.addEventListener('astro:page-load', bindAll);
+  document.addEventListener('astro:before-swap', teardown);
+</script>

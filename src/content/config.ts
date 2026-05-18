@@ -50,6 +50,17 @@ const postSchema = z.discriminatedUnion('type', [
     draft: z.boolean().default(false),
   }),
   z.object({
+    type: z.literal('gallery'),
+    images: z.array(z.object({
+      src: z.string(),
+      caption: z.string().optional(),
+    })).min(1),
+    publishedAt: z.coerce.date(),
+    threadId: z.string().optional(),
+    tags: tagSchema,
+    draft: z.boolean().default(false),
+  }),
+  z.object({
     type: z.literal('audio'),
     title: z.string(),
     audioFile: z.string(),

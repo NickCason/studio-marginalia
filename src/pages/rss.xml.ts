@@ -20,6 +20,7 @@ export async function GET(context: APIContext) {
         case 'quote': title = `Quote: ${data.source}`; description = p.body; break;
         case 'link':  title = `Link: ${data.title}`; description = p.body.slice(0, 200); break;
         case 'photo': title = 'Photo'; description = data.caption ?? ''; break;
+        case 'gallery': title = `Gallery (${data.images.length} photos)`; description = data.images[0]?.caption ?? ''; break;
         case 'audio': title = `Voice memo: ${data.title}`; description = data.transcript ?? p.body; break;
       }
       return {
