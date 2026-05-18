@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { recorderReducer, initialState, type State, type Action } from './recorderReducer';
+import { recorderReducer, initialState, type State } from './recorderReducer';
 
 const fakeBlob = new Uint8Array([1, 2, 3]);
 
@@ -11,14 +11,18 @@ describe('recorderReducer', () => {
   it('starts in idle-existing when there is a saved value', () => {
     const s = initialState({ existingValue: '/media/voice-memo-x.webm' });
     expect(s.status).toBe('idle-existing');
-    expect(s.existingUrl).toBe('/media/voice-memo-x.webm');
+    if (s.status === 'idle-existing') {
+      expect(s.existingUrl).toBe('/media/voice-memo-x.webm');
+    }
   });
 
   it('idle-empty + START_RECORDING -> recording', () => {
     const s: State = { status: 'idle-empty' };
     const next = recorderReducer(s, { type: 'START_RECORDING' });
     expect(next.status).toBe('recording');
-    expect(next.startedAt).toBeInstanceOf(Date);
+    if (next.status === 'recording') {
+      expect(next.startedAt).toBeInstanceOf(Date);
+    }
   });
 
   it('recording + STOP_RECORDING(blob) -> recorded with blob and url', () => {
@@ -30,9 +34,11 @@ describe('recorderReducer', () => {
       previewUrl: 'blob:http://localhost/fake',
     });
     expect(next.status).toBe('recorded');
-    expect(next.blob).toBe(fakeBlob);
-    expect(next.mimeType).toBe('audio/webm');
-    expect(next.previewUrl).toBe('blob:http://localhost/fake');
+    if (next.status === 'recorded') {
+      expect(next.blob).toBe(fakeBlob);
+      expect(next.mimeType).toBe('audio/webm');
+      expect(next.previewUrl).toBe('blob:http://localhost/fake');
+    }
   });
 
   it('recorded + USE_RECORDING is a no-op state-wise (parent commits via onChange)', () => {
@@ -55,7 +61,9 @@ describe('recorderReducer', () => {
     };
     const next = recorderReducer(s, { type: 'DISCARD' });
     expect(next.status).toBe('idle-empty');
-    expect((next as any).blob).toBeUndefined();
+    if (next.status === 'idle-empty') {
+      expect((next as any).blob).toBeUndefined();
+    }
   });
 
   it('idle-empty + FILE_SELECTED(blob) -> recorded', () => {
@@ -67,14 +75,18 @@ describe('recorderReducer', () => {
       previewUrl: 'blob:y',
     });
     expect(next.status).toBe('recorded');
-    expect(next.blob).toBe(fakeBlob);
+    if (next.status === 'recorded') {
+      expect(next.blob).toBe(fakeBlob);
+    }
   });
 
   it('any state + ERROR(reason) -> error', () => {
     const s: State = { status: 'recording', startedAt: new Date() };
     const next = recorderReducer(s, { type: 'ERROR', reason: 'mic denied' });
     expect(next.status).toBe('error');
-    expect(next.reason).toBe('mic denied');
+    if (next.status === 'error') {
+      expect(next.reason).toBe('mic denied');
+    }
   });
 
   it('error + RESET -> idle-empty', () => {
