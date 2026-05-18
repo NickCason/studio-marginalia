@@ -28,6 +28,7 @@ const postTypeField = fields.select({
     { label: 'Quote', value: 'quote' },
     { label: 'Link', value: 'link' },
     { label: 'Photo', value: 'photo' },
+    { label: 'Gallery (multi-photo)', value: 'gallery' },
     { label: 'Voice memo', value: 'audio' },
   ],
   defaultValue: 'note',
@@ -107,6 +108,26 @@ export default config({
           multiline: true,
           validation: { isRequired: false },
         }),
+
+        images: fields.array(
+          fields.object({
+            src: fields.image({
+              label: '[GALLERY] Image',
+              directory: 'public/media',
+              publicPath: '/media/',
+              validation: { isRequired: true },
+            }),
+            caption: fields.text({
+              label: 'Caption (optional)',
+              validation: { isRequired: false },
+            }),
+          }),
+          {
+            label: '[GALLERY] Images',
+            itemLabel: (props) =>
+              props.fields.caption.value || props.fields.src.value || '(image)',
+          },
+        ),
 
         audioFile: audioRecorder({
           label: '[VOICE MEMO] Audio file',
