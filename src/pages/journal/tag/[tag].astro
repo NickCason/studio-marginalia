@@ -7,6 +7,7 @@ import NoteCard from '~/components/post-types/NoteCard.astro';
 import QuoteCard from '~/components/post-types/QuoteCard.astro';
 import LinkCard from '~/components/post-types/LinkCard.astro';
 import PhotoCard from '~/components/post-types/PhotoCard.astro';
+import GalleryCard from '~/components/post-types/GalleryCard.astro';
 import AudioCard from '~/components/post-types/AudioCard.astro';
 import { slugifyTag } from '~/lib/slugifyTag';
 
@@ -52,6 +53,7 @@ const { display, posts } = Astro.props;
           case 'quote': return <QuoteCard post={post} />;
           case 'link':  return <LinkCard post={post} />;
           case 'photo': return <PhotoCard post={post} />;
+          case 'gallery': return <GalleryCard post={post} />;
           case 'audio': return <AudioCard post={post} />;
         }
       })}

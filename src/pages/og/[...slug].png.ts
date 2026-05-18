@@ -41,6 +41,7 @@ export const GET: APIRoute = async ({ props }) => {
     case 'quote': title = `"${(post.body ?? '').toString().trim().replace(/^["“]|["”]$/g, '').slice(0, 100)}"`; break;
     case 'note':  title = (post.body ?? '').toString().trim().slice(0, 120); break;
     case 'photo': title = post.data.caption ?? 'Photo'; break;
+    case 'gallery': title = post.data.images[0]?.caption ?? `Gallery · ${post.data.images.length} photos`; break;
     default:      title = 'Blue Studio';
   }
   if (!title) title = 'Blue Studio';
