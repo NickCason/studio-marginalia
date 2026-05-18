@@ -117,13 +117,13 @@ export function audioRecorder(opts: FieldOpts) {
         return {
           data: new Uint8Array(),
           filename: stripped,
-          extension: stripped.split('.').pop() ?? '',
+          extension: stripped.match(/\.([^.]+$)/)?.[1] ?? '',
         };
       }
       return {
         data: args.asset,
         filename: stripped,
-        extension: stripped.split('.').pop() ?? '',
+        extension: stripped.match(/\.([^.]+$)/)?.[1] ?? '',
       };
     },
 
@@ -137,20 +137,20 @@ export function audioRecorder(opts: FieldOpts) {
       args: { suggestedFilenamePrefix: string | undefined; slug: string | undefined },
     ) {
       if (value === null) {
-        return { value: undefined as unknown, asset: undefined };
+        return { value: undefined, asset: undefined };
       }
       if (value.data.length === 0) {
         // Legacy/external value hydrated from disk but user didn't re-record.
         // Preserve the original frontmatter string (value.filename holds the full
         // legacy URL because parse() didn't strip a non-matching publicPath).
-        return { value: value.filename as unknown, asset: undefined };
+        return { value: value.filename, asset: undefined };
       }
       // React component already built the filename via generateAudioFilename().
       // Ignore suggestedFilenamePrefix — the spec requires voice-memo-<ts> form.
       const filename = value.filename;
       const url = `${opts.publicPath.replace(/\/*$/, '')}/${filename}`;
       return {
-        value: url as unknown,
+        value: url,
         asset: { filename, content: value.data },
       };
     },
