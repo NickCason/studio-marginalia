@@ -128,6 +128,31 @@ post type:
 5. **Safari**: repeat steps 1 and 3 in Safari (recordings will be `.mp4`
    instead of `.webm` — both should round-trip cleanly).
 
+### Gallery smoke checklist (after deploys that touch the gallery)
+
+Run these manually on `bluestudio.space/keystatic/` after any change to
+the gallery components, schema, or KeyStatic admin schema for the
+gallery post type:
+
+1. **Create a multi-image gallery**: New post → type Gallery → add 3+
+   images via the Images array → caption a couple → Save. After the
+   Cloudflare deploy completes, confirm:
+   - Feed shows the stacked carousel with active image centered and
+     side images peeking behind
+   - Arrow buttons, dot indicator, and horizontal swipe all cycle slides
+   - Tap an image → existing PhotoLightbox opens; lightbox arrows cycle
+     through all gallery images
+   - Caption beneath the carousel swaps with the active slide
+2. **Single-image gallery**: same flow with one image. Confirm it renders
+   as a plain photo (no nav chrome) — identical UX to a photo post.
+3. **Permalink**: click the gallery card → confirm the permalink view
+   renders the same carousel at a larger size.
+4. **Reduced motion**: in browser settings, enable "Reduce motion".
+   Reload feed. Confirm side cards are hidden, only active image visible,
+   nav still works via buttons / dots / swipe.
+5. **Existing post types**: regression check — confirm photo, note,
+   quote, link, audio, essay still render correctly.
+
 ## Deployment (first time, once Nick has accounts)
 
 1. **Cloudflare account:** https://dash.cloudflare.com/sign-up (free)
