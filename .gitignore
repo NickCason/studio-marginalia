@@ -12,3 +12,4 @@ test-results
 src/content/posts/**/*.waveform.json
 public/audio/*.waveform.json
 public/media/*.waveform.json
+.superpowers
