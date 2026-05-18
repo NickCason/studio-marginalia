@@ -55,10 +55,17 @@ export function audioRecorder(opts: FieldOpts) {
       // Input; it passes parsed asset value (or null). We reconstruct the
       // original string from props.value.filename + opts.publicPath when
       // there's a value, so the player can render an existing recording.
-      const existingValueString =
-        props.value && props.value.filename
-          ? `${opts.publicPath.replace(/\/*$/, '')}/${props.value.filename}`
-          : null;
+      const filename = props.value?.filename;
+      let existingValueString: string | null = null;
+      if (filename) {
+        if (filename.startsWith('/') || /^https?:\/\//i.test(filename)) {
+          // Legacy or external URL — already a full path, use as-is.
+          existingValueString = filename;
+        } else {
+          // In-collection asset — prepend publicPath.
+          existingValueString = `${opts.publicPath.replace(/\/*$/, '')}/${filename}`;
+        }
+      }
       return (
         <AudioRecorderInput
           {...props}
@@ -129,17 +136,18 @@ export function audioRecorder(opts: FieldOpts) {
       value: AssetValue,
       args: { suggestedFilenamePrefix: string | undefined; slug: string | undefined },
     ) {
-      if (value === null || value.data.length === 0) {
-        // data.length === 0 means we hydrated a legacy/external value and the
-        // user didn't re-record. Preserve the original frontmatter string.
+      if (value === null) {
         return { value: undefined as unknown, asset: undefined };
       }
-      // Use suggestedFilenamePrefix (prop-path-based auto-name) when provided,
-      // matching the same behaviour as fields.file. Otherwise keep our own
-      // generated filename.
-      const filename = args.suggestedFilenamePrefix
-        ? `${args.suggestedFilenamePrefix}.${value.extension}`
-        : value.filename;
+      if (value.data.length === 0) {
+        // Legacy/external value hydrated from disk but user didn't re-record.
+        // Preserve the original frontmatter string (value.filename holds the full
+        // legacy URL because parse() didn't strip a non-matching publicPath).
+        return { value: value.filename as unknown, asset: undefined };
+      }
+      // React component already built the filename via generateAudioFilename().
+      // Ignore suggestedFilenamePrefix — the spec requires voice-memo-<ts> form.
+      const filename = value.filename;
       const url = `${opts.publicPath.replace(/\/*$/, '')}/${filename}`;
       return {
         value: url as unknown,
