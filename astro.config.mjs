@@ -19,7 +19,12 @@ export default defineConfig({
   // route so the public site stays fully static.
   output: 'server',
   adapter: cloudflare({ imageService: 'passthrough' }),
-  integrations: [sitemap(), waveformIntegration(), react(), keystatic()],
+  integrations: [
+    sitemap({ filter: (page) => !page.includes('/preview/') }),
+    waveformIntegration(),
+    react(),
+    keystatic(),
+  ],
   devToolbar: { enabled: false },
   vite: {
     resolve: {

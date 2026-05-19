@@ -1,0 +1,97 @@
+---
+export const prerender = true;
+import Base from '~/layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const cases = await getCollection('portfolio');
+cases.sort((a, b) => (a.data.order - b.data.order) || (b.data.year - a.data.year));
+---
+<Base title="Selected work — Blue Studio (preview)" noindex>
+  <div class="preview-banner" role="note">
+    <i class="ph-duotone ph-eye"></i>
+    Preview — this version is for you. The live site is at <a href="/work/portfolio/">/work/portfolio/</a>.
+  </div>
+  <section class="page">
+    <h1 class="hed serif-italic">Selected work</h1>
+    <p class="sub">A small library of campaigns and brand projects from the last few years. Some loud, most quiet, all written by hand.</p>
+    <div class="grid">
+      {cases.map((c) => {
+        const styleStr = c.data.image
+          ? `background-image:url(${c.data.image});background-size:cover;background-position:center;`
+          : 'background:linear-gradient(135deg,var(--np-rose),var(--np-amethyst));';
+        return (
+          <a class="case" href={`/preview/work/portfolio/${c.slug}/`}>
+            <div class="img" style={styleStr}></div>
+            <div class="body">
+              <div class="meta">{c.data.year} · {c.data.serviceCategory}</div>
+              <h3 class="name serif-italic">{c.data.name}</h3>
+              <p class="pitch">{c.data.pitch}</p>
+            </div>
+          </a>
+        );
+      })}
+      {cases.length === 0 && <p class="empty serif-italic">Case studies coming soon.</p>}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .preview-banner {
+    background: rgba(110, 90, 138, 0.18);
+    border-bottom: 1px solid var(--accent);
+    padding: 10px 24px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--fg);
+  }
+  .preview-banner i { color: var(--accent-text); margin-right: 6px; }
+  .preview-banner a { color: var(--accent-text); border-bottom: 1px dotted var(--accent-text); }
+
+  .page { padding: 56px; max-width: 1280px; margin: 0 auto; }
+  .hed { font-size: 36px; margin: 0 0 8px; font-weight: 400; }
+  .sub { color: var(--fg-soft); margin: 0 0 36px; max-width: 56ch; opacity: 0.92; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .case {
+    display: block;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    background: rgba(15,15,20,0.5);
+    color: inherit;
+    transition: transform 500ms var(--ease), box-shadow 500ms var(--ease), border-color 500ms var(--ease);
+    position: relative;
+  }
+  :root[data-theme='light'] .case { background: rgba(232,228,223,0.5); }
+  .case .img {
+    height: 180px;
+    transition: transform 600ms var(--ease);
+    transform-origin: center;
+  }
+  .case::after {
+    content: '→';
+    position: absolute;
+    bottom: 24px;
+    right: 22px;
+    font-size: 14px;
+    color: var(--accent-text);
+    opacity: 0.4;
+    transform: translateX(0);
+    transition: opacity 300ms var(--ease), transform 300ms var(--ease);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    a.case:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 40px -12px rgba(110, 90, 138, 0.45);
+      border-color: var(--accent);
+    }
+    a.case:hover .img { transform: scale(1.04); }
+    a.case:hover::after { opacity: 1; transform: translateX(4px); }
+  }
+  .body { padding: 18px 22px 20px; }
+  .meta { font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--accent-text); margin-bottom: 8px; }
+  .name { font-size: 22px; line-height: 1.2; margin: 0 0 6px; color: var(--fg); font-weight: 400; }
+  .pitch { font-size: 13px; line-height: 1.5; color: var(--fg-soft); margin: 0; opacity: 0.9; }
+  .empty { padding: 48px 0; opacity: 0.7; }
+  @media (max-width: 760px) { .page { padding: 32px 20px; } .grid { grid-template-columns: 1fr; } }
+</style>
