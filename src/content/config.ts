@@ -63,7 +63,7 @@ const postSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('audio'),
     title: z.string(),
-    audioFile: z.string(),
+    audioFile: z.string().optional(),
     duration: z.string(),
     context: z.string().optional(),
     transcript: z.string().optional(),

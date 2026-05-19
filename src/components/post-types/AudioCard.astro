@@ -15,38 +15,54 @@ if (post.data.type !== 'audio') throw new Error('AudioCard requires audio post')
 //     → resolves to /audio/<slug>.mp3 + sibling .waveform.json in public/audio/
 //   - a Tina-uploaded path like "/media/voice-memo-2026-05-05.m4a"
 //     → resolves to that URL directly + sibling .waveform.json next to the file
-const value: string = post.data.audioFile;
-const isAbsolute = value.startsWith('/');
-const publicUrl = isAbsolute ? value : `/audio/${value}.mp3`;
-const wfPath = isAbsolute
-  ? path.resolve('public', value.replace(/^\//, '').replace(/\.[^.]+$/, '.waveform.json'))
-  : path.resolve('public/audio', `${value}.waveform.json`);
+//   - undefined if the user removed the audio without deleting the post
+const value: string | undefined = post.data.audioFile;
+const isAbsolute = value?.startsWith('/') ?? false;
+const publicUrl = value ? (isAbsolute ? value : `/audio/${value}.mp3`) : '';
 let peaks: number[] = Array.from({ length: 32 }, () => 0.5);
-try {
-  const wf = JSON.parse(await fs.readFile(wfPath, 'utf-8'));
-  if (Array.isArray(wf.peaks) && wf.peaks.length > 0) peaks = wf.peaks;
-} catch {
-  // missing waveform — render flat bars
+if (value) {
+  const wfPath = isAbsolute
+    ? path.resolve('public', value.replace(/^\//, '').replace(/\.[^.]+$/, '.waveform.json'))
+    : path.resolve('public/audio', `${value}.waveform.json`);
+  try {
+    const wf = JSON.parse(await fs.readFile(wfPath, 'utf-8'));
+    if (Array.isArray(wf.peaks) && wf.peaks.length > 0) peaks = wf.peaks;
+  } catch {
+    // missing waveform — render flat bars
+  }
 }
 ---
 <article class="audio-card">
   <MetaRow items={['Voice memo', formatRelative(post.data.publishedAt) + (post.data.context ? ` · ${post.data.context}` : '')]} />
-  <div class="player" data-audio-src={publicUrl}>
-    <div class="head">
-      <button class="play" aria-label="Play audio">
-        <i class="ph-fill ph-play"></i>
-      </button>
-      <div class="info">
-        <a href={`/journal/${post.slug}/`} class="title-link">
-          <div class="title serif-italic">{post.data.title}</div>
-        </a>
-        <div class="dur">{post.data.duration}</div>
+  {value ? (
+    <div class="player" data-audio-src={publicUrl}>
+      <div class="head">
+        <button class="play" aria-label="Play audio">
+          <i class="ph-fill ph-play"></i>
+        </button>
+        <div class="info">
+          <a href={`/journal/${post.slug}/`} class="title-link">
+            <div class="title serif-italic">{post.data.title}</div>
+          </a>
+          <div class="dur">{post.data.duration}</div>
+        </div>
+      </div>
+      <div class="waveform">
+        {peaks.map((p) => <div class="bar" style={`height: ${Math.max(12, Math.round(p * 100))}%`}></div>)}
       </div>
     </div>
-    <div class="waveform">
-      {peaks.map((p) => <div class="bar" style={`height: ${Math.max(12, Math.round(p * 100))}%`}></div>)}
+  ) : (
+    <div class="player player-empty">
+      <div class="head">
+        <div class="info">
+          <a href={`/journal/${post.slug}/`} class="title-link">
+            <div class="title serif-italic">{post.data.title}</div>
+          </a>
+          <div class="dur">No audio</div>
+        </div>
+      </div>
     </div>
-  </div>
+  )}
   <TagList tags={post.data.tags} />
 </article>
 

@@ -200,6 +200,11 @@ export function AudioRecorderInput(props: Props) {
     dispatch({ type: 'DISCARD' });
   }
 
+  function removeExisting() {
+    props.onChange(null);
+    dispatch({ type: 'RESET' });
+  }
+
   // ---- Render ----
   return (
     <div
@@ -235,11 +240,18 @@ export function AudioRecorderInput(props: Props) {
             </div>
           )}
           <audio controls src={state.existingUrl} style={{ width: '100%' }} />
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button type="button" onClick={startRecording}>
               ● Re-record
             </button>
             <UploadButton onPick={onFilePicked} label="Replace with upload" />
+            <button
+              type="button"
+              onClick={removeExisting}
+              style={{ marginLeft: 'auto', color: 'crimson' }}
+            >
+              Remove
+            </button>
           </div>
         </div>
       )}
