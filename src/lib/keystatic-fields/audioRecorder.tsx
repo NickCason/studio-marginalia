@@ -116,10 +116,16 @@ export function audioRecorder(opts: FieldOpts) {
       value: unknown,
       args: { suggestedFilenamePrefix: string | undefined; slug: string | undefined },
     ): string | undefined {
-      if (typeof value === 'string' && value.length > 0) {
-        return stripPrefix(value, srcPrefixWithSlug(opts.publicPath, args.slug));
-      }
-      return undefined;
+      if (typeof value !== 'string' || value.length === 0) return undefined;
+      const prefix = srcPrefixWithSlug(opts.publicPath, args.slug);
+      // Legacy / external URLs (don't start with our publicPath + slug) are
+      // not on-disk assets we manage. Returning undefined makes KeyStatic
+      // skip both loading them on parse and — critically — deleting them on
+      // clear/replace. Otherwise GitHub returns "a path was requested for
+      // deletion which does not exist as of commit oid" when the user clears
+      // a legacy-pathed audio.
+      if (!value.startsWith(prefix)) return undefined;
+      return stripPrefix(value, prefix);
     },
 
     parse(
