@@ -1,6 +1,7 @@
 ---
 slug: ''
 type: note
+publishedAt: 2026-05-18T23:00:00.000Z
 draft: false
 tags: []
 images: []
