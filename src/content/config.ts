@@ -125,4 +125,49 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { posts, portfolio, now, noticing, site, pages };
+const workPage = defineCollection({
+  type: 'data',
+  schema: z.object({
+    seo: z.object({
+      title: z.string(),
+      description: z.string(),
+    }),
+    hero: z.object({
+      eyebrow: z.string(),
+      heading: z.string(),
+      headingAmp: z.string(),
+      sub: z.string(),
+      ctaLabel: z.string(),
+    }),
+    services: z.object({
+      eyebrow: z.string(),
+      items: z
+        .array(
+          z.object({
+            icon: z.string(),
+            title: z.string(),
+            body: z.string(),
+          }),
+        )
+        .default([]),
+    }),
+    fit: z.object({
+      eyebrow: z.string(),
+      yesHeading: z.string(),
+      yesItems: z.array(z.string()).default([]),
+      noHeading: z.string(),
+      noItems: z.array(z.string()).default([]),
+    }),
+    contact: z.object({
+      heading: z.string(),
+      sub: z.string(),
+      namePlaceholder: z.string(),
+      emailPlaceholder: z.string(),
+      messagePlaceholder: z.string(),
+      submitLabel: z.string(),
+      fallbackEmail: z.string(),
+    }),
+  }),
+});
+
+export const collections = { posts, portfolio, now, noticing, site, pages, workPage };
