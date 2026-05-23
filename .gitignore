@@ -9,6 +9,7 @@ dist
 playwright-report
 test-results
 .wrangler
+.pnpm-store
 src/content/posts/**/*.waveform.json
 public/audio/*.waveform.json
 public/media/*.waveform.json
