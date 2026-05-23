@@ -1,0 +1,64 @@
+{
+  "seo": {
+    "title": "Work with me — Blue Studio",
+    "description": "Quiet marketing for the patient, and the patiently impatient. Brand voice, content strategy, campaign copy by Nina Pfeiffer."
+  },
+  "hero": {
+    "eyebrow": "For brands done performing",
+    "heading": "Quiet marketing for the patient,",
+    "headingAmp": "and the patiently impatient",
+    "sub": "I write brand voice, content strategy, and campaign copy for small businesses that want to sound like themselves again. No \"engagement-bait.\" No twelve posts a week. Just one true thing, well said, on a useful cadence.",
+    "ctaLabel": "Tell me about your brand"
+  },
+  "services": {
+    "eyebrow": "What we do",
+    "items": [
+      {
+        "icon": "ph-quotes",
+        "title": "Brand voice & messaging",
+        "body": "The way the brand sounds in writing — guidelines, tone, vocabulary, what it doesn't say. Includes a voice doc you'll actually use."
+      },
+      {
+        "icon": "ph-calendar-blank",
+        "title": "Content strategy",
+        "body": "What to post, on what cadence, and (just as important) what to stop doing. Editorial calendars built around your real capacity."
+      },
+      {
+        "icon": "ph-pen-nib",
+        "title": "Campaign concepts & copy",
+        "body": "Launches, seasonal pushes, the occasional manifesto. From idea to written assets, ready to ship."
+      },
+      {
+        "icon": "ph-flame",
+        "title": "Slow retainers",
+        "body": "One good thing per week. Could be a post, an email, a campaign brief — whatever the brand actually needs that week."
+      }
+    ]
+  },
+  "fit": {
+    "eyebrow": "Is this for you?",
+    "yesHeading": "Probably yes if —",
+    "yesItems": [
+      "You think your brand sounds like everyone else's and it bothers you.",
+      "You'd rather post less and mean it more.",
+      "You want a writer in the room, not a \"content creator.\"",
+      "Your audience doesn't show up for trends. Yours."
+    ],
+    "noHeading": "Probably no if —",
+    "noItems": [
+      "You need 30 pieces of content this month, no preference on which.",
+      "Your strategy is \"go viral.\"",
+      "You want someone to manage your DMs.",
+      "The brief is \"make us sound like <competitor>.\""
+    ]
+  },
+  "contact": {
+    "heading": "Tell me about your brand.",
+    "sub": "A few sentences is plenty. I'll write back within a week.",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "Email",
+    "messagePlaceholder": "What does the brand do? What feels off about how it currently sounds? What would 'better' look like to you?",
+    "submitLabel": "Send",
+    "fallbackEmail": "hello@bluestudio.space"
+  }
+}
