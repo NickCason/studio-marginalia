@@ -4,7 +4,7 @@ import { getEntry } from 'astro:content';
 import Base from '~/layouts/Base.astro';
 
 const entry = await getEntry('workPage', 'work');
-if (!entry) throw new Error('Missing src/content/pages/work.json');
+if (!entry) throw new Error('Missing src/content/workPage/work.json');
 const { seo, hero, services, fit, contact } = entry.data;
 
 const formspree = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT || '';
