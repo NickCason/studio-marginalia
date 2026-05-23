@@ -35,6 +35,27 @@ const postTypeField = fields.select({
   defaultValue: 'note',
 });
 
+const workIconOptions = [
+  { label: 'Quote marks', value: 'ph-quotes' },
+  { label: 'Pen nib', value: 'ph-pen-nib' },
+  { label: 'Calendar', value: 'ph-calendar-blank' },
+  { label: 'Flame', value: 'ph-flame' },
+  { label: 'Notebook', value: 'ph-notebook' },
+  { label: 'Compass', value: 'ph-compass' },
+  { label: 'Feather', value: 'ph-feather' },
+  { label: 'Star', value: 'ph-star' },
+  { label: 'Moon', value: 'ph-moon' },
+  { label: 'Sparkle', value: 'ph-sparkle' },
+  { label: 'Sun (dim)', value: 'ph-sun-dim' },
+  { label: 'Leaf', value: 'ph-leaf' },
+  { label: 'Heart', value: 'ph-heart' },
+  { label: 'Coffee', value: 'ph-coffee' },
+  { label: 'Envelope', value: 'ph-envelope-simple' },
+  { label: 'Megaphone (soft)', value: 'ph-megaphone-simple' },
+  { label: 'Lightbulb', value: 'ph-lightbulb' },
+  { label: 'Bookmark', value: 'ph-bookmark-simple' },
+] as const;
+
 export default config({
   storage:
     process.env.KEYSTATIC_STORAGE === 'local'
@@ -48,7 +69,7 @@ export default config({
     brand: { name: 'Blue Studio', mark: BrandMark },
     navigation: {
       Content: ['posts', 'portfolio', 'noticing'],
-      'Site state': ['now', 'site', 'aboutPage'],
+      'Site state': ['now', 'site', 'workPage', 'aboutPage'],
     },
   },
 
@@ -230,6 +251,91 @@ export default config({
         season: fields.text({ label: 'Season (Spring/Summer/Fall/Winter)' }),
         year: fields.text({ label: 'Year label (e.g. "year one")' }),
         tagline: fields.text({ label: 'Tagline (optional)', validation: { isRequired: false } }),
+      },
+    }),
+
+    workPage: singleton({
+      label: 'Work page',
+      path: 'src/content/pages/work',
+      format: 'json',
+      schema: {
+        seo: fields.object(
+          {
+            title: fields.text({ label: 'SEO title' }),
+            description: fields.text({ label: 'SEO description', multiline: true }),
+          },
+          { label: 'SEO' },
+        ),
+        hero: fields.object(
+          {
+            eyebrow: fields.text({ label: 'Eyebrow (small caps label above heading)' }),
+            heading: fields.text({
+              label: 'Heading (first line)',
+              multiline: true,
+            }),
+            headingAmp: fields.text({
+              label: 'Heading accent (italicized second line)',
+              description: 'Rendered in italic accent color after a line break.',
+            }),
+            sub: fields.text({ label: 'Sub-heading paragraph', multiline: true }),
+            ctaLabel: fields.text({ label: 'CTA button label' }),
+          },
+          { label: 'Hero' },
+        ),
+        services: fields.object(
+          {
+            eyebrow: fields.text({ label: 'Section eyebrow (e.g. "What we do")' }),
+            items: fields.array(
+              fields.object({
+                icon: fields.select({
+                  label: 'Icon',
+                  options: workIconOptions,
+                  defaultValue: 'ph-quotes',
+                }),
+                title: fields.text({ label: 'Card title' }),
+                body: fields.text({ label: 'Card body', multiline: true }),
+              }),
+              {
+                label: 'Service cards',
+                itemLabel: (props) => props.fields.title.value || '(untitled card)',
+              },
+            ),
+          },
+          { label: 'Services' },
+        ),
+        fit: fields.object(
+          {
+            eyebrow: fields.text({ label: 'Section eyebrow (e.g. "Is this for you?")' }),
+            yesHeading: fields.text({ label: '"Yes" column heading' }),
+            yesItems: fields.array(fields.text({ label: 'Bullet' }), {
+              label: '"Yes" bullets',
+              itemLabel: (props) => props.value,
+            }),
+            noHeading: fields.text({ label: '"No" column heading' }),
+            noItems: fields.array(fields.text({ label: 'Bullet' }), {
+              label: '"No" bullets',
+              itemLabel: (props) => props.value,
+            }),
+          },
+          { label: 'Fit (Probably yes / Probably no)' },
+        ),
+        contact: fields.object(
+          {
+            heading: fields.text({ label: 'Contact heading' }),
+            sub: fields.text({ label: 'Contact sub-line', multiline: true }),
+            namePlaceholder: fields.text({ label: 'Name field placeholder' }),
+            emailPlaceholder: fields.text({ label: 'Email field placeholder' }),
+            messagePlaceholder: fields.text({
+              label: 'Message field placeholder',
+              multiline: true,
+            }),
+            submitLabel: fields.text({ label: 'Submit button label' }),
+            fallbackEmail: fields.text({
+              label: 'Fallback email (shown when Formspree is unconfigured)',
+            }),
+          },
+          { label: 'Contact' },
+        ),
       },
     }),
 
