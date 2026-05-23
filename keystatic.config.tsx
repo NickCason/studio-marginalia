@@ -256,7 +256,7 @@ export default config({
 
     workPage: singleton({
       label: 'Work page',
-      path: 'src/content/pages/work',
+      path: 'src/content/workPage/work',
       format: 'json',
       schema: {
         seo: fields.object(
