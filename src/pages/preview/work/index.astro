@@ -1,57 +1,61 @@
 ---
 export const prerender = true;
+import { getCollection, getEntry } from 'astro:content';
 import Base from '~/layouts/Base.astro';
-import { getCollection } from 'astro:content';
+
+const entry = await getEntry('workPage', 'work');
+if (!entry) throw new Error('Missing src/content/workPage/work.json');
+const { seo, hero, services, fit, contact } = entry.data;
+
 const formspree = import.meta.env.PUBLIC_FORMSPREE_ENDPOINT || '';
 const allCases = await getCollection('portfolio');
 const cases = allCases
   .sort((a, b) => (a.data.order - b.data.order) || (b.data.year - a.data.year))
   .slice(0, 3);
 ---
-<Base
-  title="Work with me — Blue Studio (preview)"
-  description="Quiet marketing for the patient, and the patiently impatient. Brand voice, content strategy, campaign copy by Nina Pfeiffer."
-  noindex
->
+<Base title={`${seo.title} (preview)`} description={seo.description} noindex>
   <div class="preview-banner" role="note">
     <i class="ph-duotone ph-eye"></i>
     Preview — this version is for you. The live site is at <a href="/work/">/work/</a>.
   </div>
 
   <section class="hero">
-    <div class="eyebrow eyebrow-rule"><span /><span>For brands done performing</span><span /></div>
-    <h1 class="hed serif-italic">Quiet marketing for the patient,<br /><em class="amp">and the patiently impatient</em>.</h1>
-    <p class="sub serif">I write brand voice, content strategy, and campaign copy for small businesses that want to sound like themselves again. No "engagement-bait." No twelve posts a week. Just one true thing, well said, on a useful cadence.</p>
-    <a href="#contact" class="cta">Tell me about your brand <i class="ph-duotone ph-arrow-right"></i></a>
+    <div class="eyebrow eyebrow-rule"><span /><span>{hero.eyebrow}</span><span /></div>
+    <h1 class="hed serif-italic">{hero.heading}<br /><em class="amp">{hero.headingAmp}</em>.</h1>
+    <p class="sub serif">{hero.sub}</p>
+    <a href="#contact" class="cta">{hero.ctaLabel} <i class="ph-duotone ph-arrow-right"></i></a>
   </section>
 
   <section class="services">
-    <div class="section-label"><span>✦</span><span>What we do</span><span>✦</span></div>
+    <div class="section-label"><span>✦</span><span>{services.eyebrow}</span><span>✦</span></div>
     <div class="grid">
-      <div class="card"><i class="ph-duotone ph-quotes"></i><h4 class="serif-italic">Brand voice & messaging</h4><p>The way the brand sounds in writing — guidelines, tone, vocabulary, what it doesn't say. Includes a voice doc you'll actually use.</p></div>
-      <div class="card"><i class="ph-duotone ph-calendar-blank"></i><h4 class="serif-italic">Content strategy</h4><p>What to post, on what cadence, and (just as important) what to stop doing. Editorial calendars built around your real capacity.</p></div>
-      <div class="card"><i class="ph-duotone ph-pen-nib"></i><h4 class="serif-italic">Campaign concepts & copy</h4><p>Launches, seasonal pushes, the occasional manifesto. From idea to written assets, ready to ship.</p></div>
-      <div class="card"><i class="ph-duotone ph-flame"></i><h4 class="serif-italic">Slow retainers</h4><p>One good thing per week. Could be a post, an email, a campaign brief — whatever the brand actually needs that week.</p></div>
+      {services.items.map((item) => (
+        <div class="card">
+          <i class={`ph-duotone ${item.icon}`}></i>
+          <h4 class="serif-italic">{item.title}</h4>
+          <p>{item.body}</p>
+        </div>
+      ))}
     </div>
   </section>
 
   <section class="fit">
-    <div class="section-label"><span>✦</span><span>Is this for you?</span><span>✦</span></div>
+    <div class="section-label"><span>✦</span><span>{fit.eyebrow}</span><span>✦</span></div>
     <div class="grid">
-      <div class="yes"><h5 class="serif-italic">Probably yes if —</h5>
+      <div class="yes">
+        <h5 class="serif-italic">{fit.yesHeading}</h5>
         <ul>
-          <li><i class="ph-duotone ph-check-circle"></i>You think your brand sounds like everyone else's and it bothers you.</li>
-          <li><i class="ph-duotone ph-check-circle"></i>You'd rather post less and mean it more.</li>
-          <li><i class="ph-duotone ph-check-circle"></i>You want a writer in the room, not a "content creator."</li>
-          <li><i class="ph-duotone ph-check-circle"></i>Your audience doesn't show up for trends. Yours.</li>
+          {fit.yesItems.map((item) => (
+            <li><i class="ph-duotone ph-check-circle"></i>{item}</li>
+          ))}
         </ul>
       </div>
-      <div class="no"><h5 class="serif-italic">Probably no if —</h5>
+      <div class="no">
+        <h5 class="serif-italic">{fit.noHeading}</h5>
         <ul>
-          <li><i class="ph-duotone ph-x-circle"></i>You need 30 pieces of content this month, no preference on which.</li>
-          <li><i class="ph-duotone ph-x-circle"></i>Your strategy is "go viral."</li>
-          <li><i class="ph-duotone ph-x-circle"></i>You want someone to manage your DMs.</li>
-          <li><i class="ph-duotone ph-x-circle"></i>The brief is "make us sound like &lt;competitor&gt;."</li>
+          {fit.noItems.map((item) => (
+            <li><i class="ph-duotone ph-x-circle"></i>{item}</li>
+          ))}
         </ul>
       </div>
     </div>
@@ -81,17 +85,17 @@ const cases = allCases
   </section>
 
   <section class="contact" id="contact">
-    <h3 class="serif-italic">Tell me about your brand.</h3>
-    <p class="sub-small">A few sentences is plenty. I'll write back within a week.</p>
+    <h3 class="serif-italic">{contact.heading}</h3>
+    <p class="sub-small">{contact.sub}</p>
     {formspree ? (
       <form class="form" action={formspree} method="POST">
-        <input type="text" name="name" placeholder="Your name" required />
-        <input type="email" name="email" placeholder="Email" required />
-        <textarea name="message" placeholder="What does the brand do? What feels off about how it currently sounds? What would 'better' look like to you?" required></textarea>
-        <button type="submit">Send <i class="ph-duotone ph-paper-plane-tilt"></i></button>
+        <input type="text" name="name" placeholder={contact.namePlaceholder} required />
+        <input type="email" name="email" placeholder={contact.emailPlaceholder} required />
+        <textarea name="message" placeholder={contact.messagePlaceholder} required></textarea>
+        <button type="submit">{contact.submitLabel} <i class="ph-duotone ph-paper-plane-tilt"></i></button>
       </form>
     ) : (
-      <p class="form-fallback serif-italic">Email <a href="mailto:hello@bluestudio.space">hello@bluestudio.space</a> for now.</p>
+      <p class="form-fallback serif-italic">Email <a href={`mailto:${contact.fallbackEmail}`}>{contact.fallbackEmail}</a> for now.</p>
     )}
   </section>
 </Base>
